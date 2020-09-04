@@ -170,15 +170,34 @@ end
 flds{1} = phaseIDs;
 flds{2} = ebsdGrid.x;
 flds{3} = ebsdGrid.y;
-flds{4} = ebsdGrid.prop.bands;
-flds{5} = ebsdGrid.prop.error;
+try 
+    flds{4} = ebsdGrid.prop.bands;
+catch
+    flds{4} = [];
+end
+try
+    flds{5} = ebsdGrid.prop.error;
+catch
+    flds{4} = [];
+end
 flds{6} = ebsdGrid.rotations.phi1/degree;
 flds{7} = ebsdGrid.rotations.Phi/degree;
 flds{8} = ebsdGrid.rotations.phi2/degree;
-flds{9} = ebsdGrid.prop.mad;
-flds{10} = ebsdGrid.prop.bc;
-flds{11} = ebsdGrid.prop.bs;
-
+try
+    flds{9} = ebsdGrid.prop.mad;
+catch
+    flds{4} = [];
+end
+try
+    flds{10} = ebsdGrid.prop.bc;
+catch
+    flds{4} = [];
+end
+try
+    flds{11} = ebsdGrid.prop.bs;
+catch
+    flds{4} = [];
+end
 %Write data
 A = zeros(ebsdGrid.length,11); %initialize
 for i = 1:length(flds)
@@ -195,7 +214,11 @@ for i = 1:length(flds)
        temp = temp(end:-1:1,:);
     end
     %Make vector
-    A(:,i) = reshape(temp,ebsdGrid.length,1);    
+    try
+        A(:,i) = reshape(temp,ebsdGrid.length,1);    
+    catch
+        A(:,i) = ones(ebsdGrid.length,1); %hack to fill in for fake ebsd
+    end
 end    
   
 A(find(all([A(:,2)>-round0Thrsh,A(:,2)<round0Thrsh],2)),2) = 0;            %Rounding close to 0 X coordinates
