@@ -113,11 +113,16 @@ for i = 1:length(AcquParam.Str) %Loop over aquisition parameters
 end
 fprintf(filePh,'\r\n');                                                    %New line
 % *** Write Phase Info
-CSlst = ebsd.CSList(unique(ebsd('indexed').phaseId));                      %List of crystal systems
+CSlst = ebsd.CSList(rmmissing(unique(ebsd('indexed').phaseId)));           %List of crystal systems
 nrPhases = length(CSlst);                                                  %Number of phases
 fprintf(filePh,'Phases\t%.0f\r\n',nrPhases);                               %Write nr of phases
 for i = 1:nrPhases %Loop over phases
-    mineral = CSlst{i}.mineral;                                            %Mineral name
+    try
+        mineral = CSlst{i}.mineral;                                            %Mineral name
+    catch
+        i=i+1; %if the first phase is notindexed
+        mineral = CSlst{i}.mineral;     
+    end
     a = CSlst{i}.aAxis.abs;                                                %Parameter 'a'
     b = CSlst{i}.bAxis.abs;                                                %Parameter 'b'
     c = CSlst{i}.cAxis.abs;                                                %Parameter 'c'
@@ -136,7 +141,7 @@ maxPhID = max(max(phaseIDs));                                              %Chec
 k = maxPhID-1;
 while k > 0
     if ~any(any(ebsdGrid.phase == 1)) %Empty phase ID, i.e. deleted phase
-       phaseIDs(phaseIDs > k) = phaseIDs(phaseIDs > k)-1; %Reduce phase ID
+       phaseIDs(phaseIDs > k) = phaseIDs(phaseIDs > k -1); %Reduce phase ID 
     end
     k = k-1;
 end
